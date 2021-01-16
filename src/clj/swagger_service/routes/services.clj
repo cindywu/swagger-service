@@ -1,13 +1,21 @@
 (ns swagger-service.routes.services
   (:require [ring.util.http-response :refer :all]
             [compojure.api.sweet :refer :all]
-            [schema.core :as s]))
+            [schema.core :as s]
+            [clj-http.client :as client]))
 
 (s/defschema Thingie {:id Long
                       :hot Boolean
                       :tag (s/enum :kikka :kukka)
                       :chief [{:name String
                                :type #{{:id String}}}]})
+
+
+(defn get-links [link-count]
+  (client/get
+   (str
+    "http://thecatapi.com/api/images/get?format=xml&results_per_page="
+    link-count)))
 
 (defapi service-routes
   {:swagger {:ui "/swagger-ui"
