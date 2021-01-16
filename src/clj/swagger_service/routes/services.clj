@@ -2,7 +2,9 @@
   (:require [ring.util.http-response :refer :all]
             [compojure.api.sweet :refer :all]
             [schema.core :as s]
-            [clj-http.client :as client]))
+            [clj-http.client :as client]
+            [clojure.java.io :as io]
+            [clojure.xml :as xml]))
 
 (s/defschema Thingie {:id Long
                       :hot Boolean
@@ -10,12 +12,15 @@
                       :chief [{:name String
                                :type #{{:id String}}}]})
 
+(defn parse-xml [xml]
+  (-> xml .getBytes io/input-stream xml/parse))
 
 (defn get-links [link-count]
-  (client/get
-   (str
-    "http://thecatapi.com/api/images/get?format=xml&results_per_page="
-    link-count)))
+  (-> "http://thecatapi.com/api/images/get?format=xml&results_per_page="
+      (str link-count)
+      client/get
+      :body
+      parse-xml))
 
 (defapi service-routes
   {:swagger {:ui "/swagger-ui"
