@@ -6,16 +6,25 @@
 (defn fetch-links! [links link-count]
   (GET "/api/cat-links"
     {:params {:link-count link-count}
-     :handler #(reset! links %)}))
+     :handler #(reset! links (vec (partition-all 6 %)))}))
+
+(defn images [links]
+  [:div.text-xs-center
+   (for [row (partition-all 3 links)]
+     ^{:key row}
+     [:div.row
+      (for [link row]
+        ^{:key link}
+        [:div.col-sm-4 [:img {:width 400 :src link}]])])])
 
 (defn home-page []
-  (let [links
-        (atom nil)]
+  (let [links (atom nil)
+        page (atom 0)]
     (fetch-links! links 20)
     (fn []
       [:div
-       (for [link @links]
-         [:img {:src link}])])))
+       (when @links
+         [images (@links @page)])])))
 
 (defn mount-components []
   (reagent/render-component [home-page] (.getElementById js/document "app")))
