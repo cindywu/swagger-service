@@ -12,6 +12,19 @@
                       :chief [{:name String
                                :type #{{:id String}}}]})
 
+(defn get-first-child [tag xml-node]
+  (->> xml-node :content (filter #(= (:tag %) tag)) first))
+
+(defn parse-link [link]
+  (->> link (get-first-child :url) :content first))
+
+(defn parse-links [links]
+  (->> links
+       (get-first-child :data)
+       (get-first-child :images)
+       :content
+       (map parse-link)))
+
 (defn parse-xml [xml]
   (-> xml .getBytes io/input-stream xml/parse))
 
